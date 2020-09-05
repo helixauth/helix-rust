@@ -6,7 +6,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(hello_world)
     })
-    .bind("localhost:3000")?
+    .bind("0.0.0.0:3000")?
     .run()
     .await
 }
