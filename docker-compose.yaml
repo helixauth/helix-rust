@@ -1,0 +1,17 @@
+version: '3.0'
+
+services:
+  helixdb:
+    image: postgres
+    container_name: helixdb
+    environment:
+      POSTGRES_USER: sysadmin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: helixdb
+    volumes:
+      - helixdb:/var/lib/helixauth/helixdb
+    ports:
+      - "5432:5432"
+
+volumes:
+  helixdb:

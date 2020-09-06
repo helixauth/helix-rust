@@ -1,28 +1,20 @@
-# # ------------------------------------------------------------------------------
-# # Build Stage
-# # ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Build Stage
+# ------------------------------------------------------------------------------
 
 FROM rust:latest as build
-ENV PKG_CONFIG_ALLOW_CROSS=1
+
+RUN mkdir -p /usr/src/helix
 
 WORKDIR /usr/src/helix
 
-COPY Cargo.toml Cargo.toml
-
-RUN mkdir src/
-
-RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
+COPY . /usr/src/helix
 
 RUN cargo build --release
 
-RUN rm -f target/release/deps/helix*
+RUN pwd
 
-COPY . .
-
-RUN cargo build --release
-
-RUN cargo install --path .
-
+RUN ls
 
 # # ------------------------------------------------------------------------------
 # # Production Stage
