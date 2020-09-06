@@ -12,9 +12,6 @@ COPY . /usr/src/helix
 
 RUN cargo build --release
 
-RUN pwd
-
-RUN ls
 
 # # ------------------------------------------------------------------------------
 # # Production Stage
@@ -22,6 +19,6 @@ RUN ls
 
 FROM gcr.io/distroless/cc-debian10
 
-COPY --from=build /usr/local/cargo/bin/helix /usr/local/bin/helix
+COPY --from=build /usr/src/helix/target/release/helix /usr/local/bin/helix
 
 CMD ["helix"]
