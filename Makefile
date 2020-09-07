@@ -9,3 +9,6 @@ dev:
 
 build:
 	cargo build
+
+migration:
+	diesel migration generate $(name)
