@@ -1,12 +1,13 @@
-use crate::database;
+pub mod database;
 
-pub struct State {
+#[derive(Clone)]
+pub struct Gateways {
     pub db: database::DB
 }
 
-pub fn build_state(cfg: &config::Config) -> State {
+pub fn new(cfg: &config::Config) -> Gateways {
     let database_url: String = cfg.get("DATABASE_URL").expect("DATABASE_URL not set");
-    State {
+    Gateways {
         db: database::open(database_url)
     }
 }

@@ -1,8 +1,9 @@
+use crate::api_error::ApiError;
+use crate::gateway;
+use crate::schema::users;
+
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::api_error::ApiError;
-use crate::database;
-use crate::schema::users;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Queryable, Insertable)]
@@ -13,14 +14,14 @@ pub struct User {
 }
 
 impl User {
-    pub fn get(id: String, conn: database::Connection) -> Result<Self, ApiError> {
+    pub fn get(id: String, conn: gateway::database::Connection) -> Result<Self, ApiError> {
         let user = users::table
             .filter(users::id.eq(id))
             .first(&conn)?;
         Ok(user)
     }
 
-    pub fn create(user: UserMessage, conn: database::Connection) -> Result<Self, ApiError> {
+    pub fn create(user: UserMessage, conn: gateway::database::Connection) -> Result<Self, ApiError> {
         let user = User::from(user);
         let user = diesel::insert_into(users::table)
             .values(user)
@@ -34,7 +35,6 @@ impl User {
 pub struct UserMessage {
     pub email: String,
 }
-
 
 impl From<UserMessage> for User {
     fn from(user: UserMessage) -> Self {

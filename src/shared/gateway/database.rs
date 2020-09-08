@@ -5,6 +5,7 @@ type ConnectionManager = r2d2::ConnectionManager<PgConnection>;
 type ConnectionPool = r2d2::Pool<ConnectionManager>;
 pub type Connection = r2d2::PooledConnection<ConnectionManager>;
 
+#[derive(Clone)]
 pub struct DB {
     pool: ConnectionPool
 }

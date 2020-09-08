@@ -2,37 +2,41 @@
 extern crate diesel;
 
 use actix_web::{get, middleware, App, HttpResponse, HttpServer, Responder};
+use futures::future;
+use shared::*;
 
-mod app;
-mod api_error;
-mod database;
-mod schema;
-mod users;
+pub mod apps;
+pub mod schema;
+pub mod shared;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
-
-    // Set up dependencies (e.g. database connection pool)
     let cfg = load_config("config/dev");
 
-    // Start HTTP server
-    let host: String = cfg.get("HOST").expect("Host not set");
-    let port: String = cfg.get("PORT").expect("Port not set");
-    let bind = format!("{}:{}", host, port);
-    println!("📡 Starting server at: {}", &bind);
-    HttpServer::new(move || {
-        let state = app::build_state(&cfg);
+    let gateways = gateway::new(&cfg);
+    let gateways2 = gateways.clone();
+    let s1 = HttpServer::new(move || { 
         App::new()
-            .data(state)
+            .data(gateways.clone())
             .wrap(middleware::Logger::default())
-            .configure(users::init_routes)
+            .configure(apps::admin::init_routes)
+    })
+    .bind("0.0.0.0:80")?
+    .run();
+
+    let s2 = HttpServer::new(move || {
+        App::new()
+            .data(gateways2.clone())
+            .wrap(middleware::Logger::default())
             .service(hello_world)
     })
-    .bind(&bind)?
-    .run()
-    .await
+    .bind("0.0.0.0:2048")?
+    .run();
+
+    future::try_join(s1, s2).await?;
+    Ok(())
 }
 
 fn load_config(filename: &str) -> config::Config {
