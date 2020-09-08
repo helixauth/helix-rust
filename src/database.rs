@@ -1,13 +1,25 @@
-use config::Config;
 use diesel::prelude::*;
-use diesel::r2d2::{self, ConnectionManager};
+use diesel::r2d2;
 
-pub type ConnectionPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+type ConnectionManager = r2d2::ConnectionManager<PgConnection>;
+type ConnectionPool = r2d2::Pool<ConnectionManager>;
+pub type Connection = r2d2::PooledConnection<ConnectionManager>;
 
-pub fn new_connection_pool(cfg: &Config) -> ConnectionPool {
-    let url: String = cfg.get("DATABASE_URL").expect("DATABASE_URL must be set");
-    let manager = ConnectionManager::<PgConnection>::new(url);
-    r2d2::Pool::builder()
-        .build(manager)
-        .expect("Failed to create pool.")
+pub struct DB {
+    pool: ConnectionPool
+}
+
+pub fn open(url: String) -> DB {
+    let pool = ConnectionPool::builder()
+        .build(ConnectionManager::new(url))
+        .expect("Failed to create connection pool");
+    DB {
+        pool: pool.clone()
+    }
+}
+
+impl DB {
+    pub fn connection(&self) -> Connection {
+        self.pool.get().expect("Failed to get connection from pool")
+    }
 }
