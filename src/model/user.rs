@@ -21,7 +21,7 @@ impl User {
         Ok(user)
     }
 
-    pub fn create(user: UserMessage, conn: gateway::database::Connection) -> Result<Self, ApiError> {
+    pub fn create(user: CreateUserMessage, conn: gateway::database::Connection) -> Result<Self, ApiError> {
         let user = User::from(user);
         let user = diesel::insert_into(users::table)
             .values(user)
@@ -32,12 +32,12 @@ impl User {
 
 #[derive(Serialize, Deserialize, AsChangeset)]
 #[table_name = "users"]
-pub struct UserMessage {
+pub struct CreateUserMessage {
     pub email: String,
 }
 
-impl From<UserMessage> for User {
-    fn from(user: UserMessage) -> Self {
+impl From<CreateUserMessage> for User {
+    fn from(user: CreateUserMessage) -> Self {
         User {
             id: Uuid::new_v4().to_string(),
             email: user.email,
