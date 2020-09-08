@@ -1,4 +1,4 @@
-use crate::api_error::ApiError;
+use crate::err::ApiError;
 use crate::gateway;
 use crate::schema::users;
 

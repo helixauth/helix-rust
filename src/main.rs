@@ -3,11 +3,12 @@ extern crate diesel;
 
 use actix_web::{get, middleware, App, HttpResponse, HttpServer, Responder};
 use futures::future;
-use shared::*;
 
-pub mod apps;
+pub mod app;
+pub mod err;
+pub mod gateway;
+pub mod model;
 pub mod schema;
-pub mod shared;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -15,20 +16,20 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     let cfg = load_config("config/dev");
 
-    let gateways = gateway::new(&cfg);
-    let gateways2 = gateways.clone();
+    let g1 = gateway::new(&cfg);
+    let g2 = gateway::new(&cfg);
     let s1 = HttpServer::new(move || { 
         App::new()
-            .data(gateways.clone())
+            .data(g1.clone())
             .wrap(middleware::Logger::default())
-            .configure(apps::admin::init_routes)
+            .configure(app::admin::init_routes)
     })
     .bind("0.0.0.0:80")?
     .run();
 
     let s2 = HttpServer::new(move || {
         App::new()
-            .data(gateways2.clone())
+            .data(g2.clone())
             .wrap(middleware::Logger::default())
             .service(hello_world)
     })
